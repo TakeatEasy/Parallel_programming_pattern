@@ -1,0 +1,38 @@
+project(Parallel_programming_pattern)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+find_package(CUDA REQUIRED)
+
+if(CUDA_FOUND)
+    # compared to class settings, we let NVidia's FindCUDA CMake detect 
+    # whether to build x64.  We tell it to support most devices, though, 
+    # to make sure more people can easily run class code without knowing 
+    # about this compiler argument
+    # if (MSVC)
+    #     set(CUDA_NVCC_FLAGS "")
+    # else (MSVC)
+    #     set(CUDA_NVCC_FLAGS "-gencode;arch=compute_86,code=sm_86;")
+    # endif (MSVC)
+
+    # add -Wextra compiler flag for gcc compilations
+    if (UNIX)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-Xcompiler -Wall;")
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-Xcompiler -Wextra")
+    endif (UNIX)
+
+    # add debugging to CUDA NVCC flags.  For NVidia's NSight tools.
+    set(CUDA_NVCC_FLAGS_DEBUG ${CUDA_NVCC_FLAGS_DEBUG} "-G")
+	include_directories(${CMAKE_SOURCE_DIR})
+	include_directories(${CUDA_INCLUDE_DIRS})
+    
+else(CUDA_FOUND)
+    message("CUDA is not installed on this system.")
+endif()
+
+file( GLOB  wbhdr lib/*.hpp lib/*.h )
+file( GLOB  wbsrc lib/*.cpp lib/*.c )
+
+include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CUDA_INCLUDE_DIRS})
+include_directories("lib/")
+
+CUDA_ADD_EXECUTABLE(MP1_Implement mp1_implement.cu ${wbhdr} ${wbsrc})
