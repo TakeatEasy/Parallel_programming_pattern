@@ -36,3 +36,4 @@ include_directories(${CUDA_INCLUDE_DIRS})
 include_directories("lib/")
 
 CUDA_ADD_EXECUTABLE(MP1_Implement mp1_implement.cu ${wbhdr} ${wbsrc})
+CUDA_ADD_EXECUTABLE(MP2_Implement mp2_implement.cu ${wbhdr} ${wbsrc})
