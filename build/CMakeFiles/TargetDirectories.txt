@@ -1,0 +1,3 @@
+/home/zhenyuan/code/Parallel_programming_pattern/build/CMakeFiles/my_test.dir
+/home/zhenyuan/code/Parallel_programming_pattern/build/CMakeFiles/edit_cache.dir
+/home/zhenyuan/code/Parallel_programming_pattern/build/CMakeFiles/rebuild_cache.dir
