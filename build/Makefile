@@ -129,6 +129,43 @@ my_test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_test.dir/build.make CMakeFiles/my_test.dir/build
 .PHONY : my_test/fast
 
+#=============================================================================
+# Target rules for targets named cuda_test
+
+# Build rule for target.
+cuda_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuda_test
+.PHONY : cuda_test
+
+# fast build rule for target.
+cuda_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda_test.dir/build.make CMakeFiles/cuda_test.dir/build
+.PHONY : cuda_test/fast
+
+reduce/reduce_basic.o: reduce/reduce_basic.cu.o
+.PHONY : reduce/reduce_basic.o
+
+# target to build an object file
+reduce/reduce_basic.cu.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda_test.dir/build.make CMakeFiles/cuda_test.dir/reduce/reduce_basic.cu.o
+.PHONY : reduce/reduce_basic.cu.o
+
+reduce/reduce_basic.i: reduce/reduce_basic.cu.i
+.PHONY : reduce/reduce_basic.i
+
+# target to preprocess a source file
+reduce/reduce_basic.cu.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda_test.dir/build.make CMakeFiles/cuda_test.dir/reduce/reduce_basic.cu.i
+.PHONY : reduce/reduce_basic.cu.i
+
+reduce/reduce_basic.s: reduce/reduce_basic.cu.s
+.PHONY : reduce/reduce_basic.s
+
+# target to generate assembly for a file
+reduce/reduce_basic.cu.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda_test.dir/build.make CMakeFiles/cuda_test.dir/reduce/reduce_basic.cu.s
+.PHONY : reduce/reduce_basic.cu.s
+
 test/test_generator.o: test/test_generator.cpp.o
 .PHONY : test/test_generator.o
 
@@ -161,7 +198,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... cuda_test"
 	@echo "... my_test"
+	@echo "... reduce/reduce_basic.o"
+	@echo "... reduce/reduce_basic.i"
+	@echo "... reduce/reduce_basic.s"
 	@echo "... test/test_generator.o"
 	@echo "... test/test_generator.i"
 	@echo "... test/test_generator.s"
