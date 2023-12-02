@@ -7,7 +7,7 @@ int ceil(int a, int b){
     return int((a + b - 1) / b);
 }
 
-__global__ void reduce_baseline(float * in, int len) {
+__global__ void reduce_warp_divergence(float * in, int len) {
     __shared__ float sdata[BLOCK_SIZE];
     int tid = threadIdx.x;
     int did = threadIdx.x + blockDim.x * blockIdx.x;
@@ -59,7 +59,7 @@ int main(int argc, char ** argv) {
     dim3 DimBlock(BLOCK_SIZE, 1, 1);
     
     //@@ Launch the GPU Kernel here
-    reduce_baseline<<<DimGrid, DimBlock>>>(deviceInput, inputLength);
+    reduce_warp_divergence<<<DimGrid, DimBlock>>>(deviceInput, inputLength);
 
     cudaDeviceSynchronize();
     
