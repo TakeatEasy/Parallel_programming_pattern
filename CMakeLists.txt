@@ -18,3 +18,4 @@ add_executable(reduce_warp_divergence ${CMAKE_SOURCE_DIR}/reduce/reduce_warp_div
 
 # for sgemm
 add_executable(sgemm_baseline ${CMAKE_SOURCE_DIR}/sgemm/sgemm_baseline.cu)
+add_executable(sgemm_shared_tiling ${CMAKE_SOURCE_DIR}/sgemm/sgemm_shared_tiling.cu)

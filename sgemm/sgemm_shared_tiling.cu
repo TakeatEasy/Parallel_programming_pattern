@@ -6,6 +6,13 @@
 
 #define OFFSET(row, col, ld) ((row) * (ld) + (col))
 #define FLOAT4(pointer) (reinterpret_cast<float4*>(&(pointer))[0])
+
+const int BM = 32;
+const int BN = 32;
+const int BK = 32;
+const int M = 1024;
+const int N = 1024;
+const int K = 1024;
 void cudaCheck(cudaError_t error) {
     if (error != cudaSuccess) {
         exit(EXIT_FAILURE);
@@ -26,22 +33,37 @@ void cpuSgemm(
     }
 }
 
-__global__ void naiveSgemm(
-    float * a, float * b, float * c,
-    const int M, const int N, const int K) {
-    int n = blockIdx.x * blockDim.x + threadIdx.x;
-    int m = blockIdx.y * blockDim.y + threadIdx.y;
+__global__ void naiveSgemm(int M, int N, int K, float *A, float *B,  float *C) {
 
-    if (m < M && n < N) {
-        
-        float psum = 0.0;
-        #pragma unroll
-        for (int k = 0; k < K; k++) {
-            
-            psum += a[OFFSET(m, k, K)] * b[OFFSET(k, n, N)];
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
+
+    __shared__ float As[BM * BK];
+    __shared__ float Bs[BK * BN];
+
+    A = &A[by * blockDim.y * K];
+    B = &B[bx * blockDim.x];
+    C = &C[by * blockDim.y * N + bx * blockDim.x];
+
+    float tmp = 0.;
+    for (int k = 0; k < K; k += BK) {
+        // 缓存A_tile和B_tile
+        As[ty * BK + tx] = A[ty * K + tx];
+        Bs[ty * BN + tx] = B[ty * N + tx];
+        // 同步所有线程缓存完成
+        __syncthreads();
+        A += BK;
+        B += BK * N;
+        for (int i = 0; i < BK; i++) {
+            tmp += As[ty * BK + i] * Bs[i * BN + tx];
         }
-        c[OFFSET(m, n, N)] = psum;
+        // FMA计算需要读取缓存数据，在新一轮写入缓存前进行同步，确保所有线程计算完成
+        __syncthreads();
     }
+    C[ty * N + tx] = tmp;
 }
 
 float testMaxError(
@@ -71,7 +93,7 @@ float testMaxError(
     
     cudaCheck(cudaMemcpy(d_a, h_a, size_a, cudaMemcpyHostToDevice));
     cudaCheck(cudaMemcpy(d_b, h_b, size_b, cudaMemcpyHostToDevice));
-    naiveSgemm<<<gridDim, blockDim>>>(d_a, d_b, d_c, M, N, K);
+    naiveSgemm<<<gridDim, blockDim>>>( M, N, K, d_a, d_b, d_c);
     cudaCheck(cudaDeviceSynchronize());
 
     cudaCheck(cudaMemcpy(h_d_c, d_c, size_c, cudaMemcpyDeviceToHost));
@@ -100,9 +122,8 @@ int main() {
 
     printf("\nKernal = naiveSgemm\n");
 
-    const int BM = 32, BN = 32;
     {
-        const int M = 1024, N = 1024, K = 1024;
+
         dim3 blockDim(BM, BN);
         dim3 gridDim((M + BM - 1) / BM, (N + BN - 1) / BN);
         float max_error = testMaxError(gridDim, blockDim, M, N, K);
